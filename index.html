@@ -505,6 +505,9 @@ label{font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.04em;tex
     <div class="nav-item" onclick="switchTab('report')" data-tab="report" id="tab-report">
       <span class="nav-icon">📊</span><span class="nav-label" id="tlReport">Monthly report</span>
     </div>
+    <div class="nav-item" onclick="switchTab('market')" data-tab="market" id="tab-market">
+      <span class="nav-icon">🌍</span><span class="nav-label" id="tlMarket">Market prices</span>
+    </div>
 
     <div class="sidebar-section" id="navActivity">ACTIVITY</div>
     <div class="nav-item" onclick="switchTab('log')" data-tab="log" id="tab-log">
@@ -741,6 +744,76 @@ label{font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.04em;tex
     <button class="btn primary" onclick="printReport()" id="btnPrintReport"></button>
   </div>
   <div id="reportContent" style="margin-top:16px"></div>
+</div>
+
+<!-- MARKET PRICES VIEW -->
+<div class="view" id="view-market">
+  <div class="toolbar" style="flex-wrap:wrap;gap:10px">
+    <div>
+      <div style="font-size:15px;font-weight:700" id="mktTitle">🌍 Global Market Prices</div>
+      <div style="font-size:11px;color:var(--text3);margin-top:2px" id="mktSub">Palm oil, soybean oil & derivatives — live & delayed data</div>
+    </div>
+    <div class="spacer"></div>
+    <span id="mktLastUpdate" style="font-size:11px;color:var(--text3);align-self:center"></span>
+    <button class="btn sm primary" onclick="loadMarketPrices()" id="btnMktRefresh">⟳ Refresh</button>
+  </div>
+
+  <!-- USD/EGP Rate banner -->
+  <div id="fxBanner" style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+    <div style="font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.04em">USD / EGP</div>
+    <div style="font-size:22px;font-weight:800;color:var(--red)" id="fxRate">—</div>
+    <div style="font-size:12px;color:var(--text3)" id="fxChange"></div>
+    <div class="spacer"></div>
+    <div style="font-size:11px;color:var(--text3)" id="fxNote">Rate used to calculate EGP landed cost</div>
+  </div>
+
+  <!-- Price cards grid -->
+  <div id="mktGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;margin-bottom:20px"></div>
+
+  <!-- Landed cost calculator -->
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 18px;margin-bottom:16px">
+    <div style="font-size:13px;font-weight:700;margin-bottom:12px" id="calcTitle">🧮 Landed Cost Calculator</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;align-items:end">
+      <div>
+        <label style="font-size:11px;color:var(--text3);font-weight:600;display:block;margin-bottom:4px" id="calcCifLabel">CIF Price (USD/MT)</label>
+        <input type="number" id="calcCif" placeholder="e.g. 850" oninput="calcLanded()" style="width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;background:var(--surface);color:var(--text);font-family:inherit">
+      </div>
+      <div>
+        <label style="font-size:11px;color:var(--text3);font-weight:600;display:block;margin-bottom:4px" id="calcDutyLabel">Customs duty %</label>
+        <input type="number" id="calcDuty" value="2" placeholder="2" oninput="calcLanded()" style="width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;background:var(--surface);color:var(--text);font-family:inherit">
+      </div>
+      <div>
+        <label style="font-size:11px;color:var(--text3);font-weight:600;display:block;margin-bottom:4px" id="calcPortLabel">Port fees (EGP/MT)</label>
+        <input type="number" id="calcPort" value="800" placeholder="800" oninput="calcLanded()" style="width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;background:var(--surface);color:var(--text);font-family:inherit">
+      </div>
+      <div>
+        <label style="font-size:11px;color:var(--text3);font-weight:600;display:block;margin-bottom:4px" id="calcTransLabel">Transport (EGP/MT)</label>
+        <input type="number" id="calcTrans" value="500" placeholder="500" oninput="calcLanded()" style="width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;background:var(--surface);color:var(--text);font-family:inherit">
+      </div>
+      <div>
+        <label style="font-size:11px;color:var(--text3);font-weight:600;display:block;margin-bottom:4px" id="calcFxLabel">USD/EGP rate</label>
+        <input type="number" id="calcFx" value="48.5" placeholder="48.5" oninput="calcLanded()" style="width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;background:var(--surface);color:var(--text);font-family:inherit">
+      </div>
+      <div>
+        <label style="font-size:11px;color:var(--text3);font-weight:600;display:block;margin-bottom:4px" id="calcMarginLabel">Margin %</label>
+        <input type="number" id="calcMargin" value="5" placeholder="5" oninput="calcLanded()" style="width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;background:var(--surface);color:var(--text);font-family:inherit">
+      </div>
+    </div>
+    <div id="calcResult" style="margin-top:14px;padding:14px 16px;background:var(--surface2);border-radius:8px;display:none">
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px">
+        <div><div style="font-size:10px;color:var(--text3);text-transform:uppercase;font-weight:600;margin-bottom:3px" id="resLandedLabel">Landed cost</div><div style="font-size:18px;font-weight:800;color:var(--text)" id="resLanded">—</div></div>
+        <div><div style="font-size:10px;color:var(--text3);text-transform:uppercase;font-weight:600;margin-bottom:3px" id="resSellLabel">Min. selling price</div><div style="font-size:18px;font-weight:800;color:var(--red)" id="resSell">—</div></div>
+        <div><div style="font-size:10px;color:var(--text3);text-transform:uppercase;font-weight:600;margin-bottom:3px" id="resCifEgpLabel">CIF in EGP</div><div style="font-size:15px;font-weight:700;color:var(--text2)" id="resCifEgp">—</div></div>
+        <div><div style="font-size:10px;color:var(--text3);text-transform:uppercase;font-weight:600;margin-bottom:3px" id="resDutyLabel">Duty amount</div><div style="font-size:15px;font-weight:700;color:var(--text2)" id="resDuty">—</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- News feed -->
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 18px">
+    <div style="font-size:13px;font-weight:700;margin-bottom:12px" id="newsTitle">📰 Latest commodity news</div>
+    <div id="mktNews" style="font-size:13px;color:var(--text2)"></div>
+  </div>
 </div>
 
 </div><!-- /main -->
@@ -1174,6 +1247,7 @@ const T = {
     poConfidenceLow:'📋 Few fields auto-filled — document may be scanned or formatted unusually. Fill remaining fields manually (raw text shown below).',
     // monthly report
     tlReport:'Monthly report',
+    tlMarket:'Market prices',
     rptMonthLabel:'Select month',
     btnGenReport:'⟳ Generate',
     btnPrintReport:'🖨 Print / PDF',
@@ -1411,6 +1485,7 @@ const T = {
     poConfidenceLow:'📋 حقول قليلة مُستخرجة — قد يكون المستند ممسوحاً ضوئياً أو بتنسيق غير معتاد. أكمل الحقول يدوياً (النص الخام موضح أدناه).',
     // monthly report
     tlReport:'التقرير الشهري',
+    tlMarket:'أسعار السوق',
     rptMonthLabel:'اختر الشهر',
     btnGenReport:'⟳ توليد التقرير',
     btnPrintReport:'🖨 طباعة / PDF',
@@ -1969,6 +2044,7 @@ function switchTab(tab){
   if(tab==='dailydeals') renderDailyDeals();
   if(tab==='currentpos') renderCurrentPOs();
   if(tab==='report') renderReport();
+  if(tab==='market'){ loadMarketPrices(); }
   updateBadges();
 }
 
@@ -5076,12 +5152,225 @@ function updateSettingsLabels(){
 }
 
 // ── Update topbar title when switching tabs ──
-const TAB_LABELS={pipeline:'Pipeline',priceboard:'Price Board',clients:'Clients',log:'Call Log',operations:'Operations',quotations:'Quotations',invoices:'Invoices',dailydeals:'Daily Deals',currentpos:'Current POs',report:'Monthly Report'};
-const TAB_LABELS_AR={pipeline:'خط الإنتاج',priceboard:'لوحة الأسعار',clients:'العملاء',log:'سجل المكالمات',operations:'العمليات',quotations:'عروض الأسعار',invoices:'الفواتير',dailydeals:'الصفقات اليومية',currentpos:'أوامر الشراء',report:'التقرير الشهري'};
+const TAB_LABELS={pipeline:'Pipeline',priceboard:'Price Board',clients:'Clients',log:'Call Log',operations:'Operations',quotations:'Quotations',invoices:'Invoices',dailydeals:'Daily Deals',currentpos:'Current POs',report:'Monthly Report',market:'Market Prices'};
+const TAB_LABELS_AR={pipeline:'خط الإنتاج',priceboard:'لوحة الأسعار',clients:'العملاء',log:'سجل المكالمات',operations:'العمليات',quotations:'عروض الأسعار',invoices:'الفواتير',dailydeals:'الصفقات اليومية',currentpos:'أوامر الشراء',report:'التقرير الشهري',market:'أسعار السوق'};
 
 // ══════════════════════════════════════
-// BOOT
+// MARKET PRICES MODULE
 // ══════════════════════════════════════
+
+// Commodity definitions — using Yahoo Finance symbols via a CORS proxy
+const COMMODITIES = [
+  { sym:'KO=F',  name:'Palm Olein (BMD)',      nameAr:'أولين النخيل (BMD)',  unit:'USD/MT',  cat:'palm',    flag:'🇲🇾' },
+  { sym:'FCPO',  name:'Crude Palm Oil (MYR)',   nameAr:'زيت النخيل الخام',   unit:'MYR/MT',  cat:'palm',    flag:'🇲🇾' },
+  { sym:'ZL=F',  name:'Soybean Oil (CBOT)',     nameAr:'زيت الصويا (CBOT)',  unit:'USc/lb',  cat:'soy',     flag:'🇺🇸' },
+  { sym:'ZS=F',  name:'Soybeans (CBOT)',        nameAr:'فول الصويا (CBOT)',  unit:'USc/bu',  cat:'soy',     flag:'🇺🇸' },
+  { sym:'SM=F',  name:'Soybean Meal (CBOT)',    nameAr:'كسب الصويا (CBOT)', unit:'USD/ST',  cat:'soy',     flag:'🇺🇸' },
+  { sym:'SUN',   name:'Sunflower Oil (MATIF)',  nameAr:'زيت عباد الشمس',    unit:'EUR/MT',  cat:'sun',     flag:'🇺🇦' },
+  { sym:'EGP=X', name:'USD / EGP',              nameAr:'دولار / جنيه',      unit:'EGP',     cat:'fx',      flag:'🇪🇬' },
+  { sym:'MYR=X', name:'USD / MYR',              nameAr:'دولار / رينجت',     unit:'MYR',     cat:'fx',      flag:'🇲🇾' },
+];
+
+const CAT_COLORS = {palm:'#e8a020',soy:'#4a9c4a',sun:'#c0a020',fx:'#185FA5'};
+const CAT_LABELS = {palm:'Palm',soy:'Soybean',sun:'Sunflower',fx:'FX Rates'};
+
+let mktData = {};
+let mktLoading = false;
+
+async function loadMarketPrices(){
+  if(mktLoading) return;
+  mktLoading = true;
+  const btn = document.getElementById('btnMktRefresh');
+  if(btn) btn.textContent = '⟳ Loading…';
+  document.getElementById('mktLastUpdate').textContent = lang==='ar'?'جارٍ التحديث…':'Updating…';
+
+  // Use Yahoo Finance via allorigins CORS proxy
+  const proxy = 'https://api.allorigins.win/get?url=';
+  const symbols = COMMODITIES.map(c=>c.sym).join('%2C');
+  const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${symbols}&fields=regularMarketPrice,regularMarketChange,regularMarketChangePercent,regularMarketTime,currency`;
+
+  try {
+    const res = await fetch(proxy + encodeURIComponent(url));
+    const json = await res.json();
+    const quotes = JSON.parse(json.contents)?.quoteResponse?.result || [];
+
+    quotes.forEach(q => {
+      mktData[q.symbol] = {
+        price:   q.regularMarketPrice,
+        change:  q.regularMarketChange,
+        changePct: q.regularMarketChangePercent,
+        time:    q.regularMarketTime,
+        currency: q.currency,
+      };
+    });
+
+    renderMarketGrid();
+    updateFXBanner();
+    calcLanded();
+    loadMarketNews();
+    const now = new Date().toLocaleTimeString(lang==='ar'?'ar-EG':'en-GB',{hour:'2-digit',minute:'2-digit'});
+    document.getElementById('mktLastUpdate').textContent = (lang==='ar'?'آخر تحديث: ':'Last update: ') + now;
+
+  } catch(e) {
+    // Fallback: show indicative prices with disclaimer
+    renderFallbackPrices();
+    document.getElementById('mktLastUpdate').textContent = lang==='ar'?'بيانات تقديرية — تعذر الاتصال':'Indicative prices — connection failed';
+  }
+
+  if(btn) btn.textContent = '⟳ Refresh';
+  mktLoading = false;
+}
+
+function renderMarketGrid(){
+  const grid = document.getElementById('mktGrid');
+  if(!grid) return;
+  const isAr = lang==='ar';
+
+  const cards = COMMODITIES.filter(c=>c.cat!=='fx').map(c=>{
+    const d = mktData[c.sym];
+    if(!d) return '';
+    const up = d.change >= 0;
+    const chgColor = up ? 'var(--green-text)' : '#a32d2d';
+    const chgBg   = up ? 'var(--green-bg)'   : '#fcebeb';
+    const arrow   = up ? '▲' : '▼';
+    const catColor = CAT_COLORS[c.cat]||'var(--red)';
+
+    // Convert to USD/MT for context where possible
+    let egpEstimate = '';
+    const fxRate = mktData['EGP=X']?.price || 48.5;
+    if(c.unit==='USc/lb'){
+      const usdMT = d.price * 22.0462;
+      egpEstimate = `≈ EGP ${Math.round(usdMT * fxRate).toLocaleString()}/MT`;
+    } else if(c.unit==='USD/MT'){
+      egpEstimate = `≈ EGP ${Math.round(d.price * fxRate).toLocaleString()}/MT`;
+    }
+
+    return `
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;position:relative;overflow:hidden">
+      <div style="position:absolute;top:0;${isAr?'right':'left'}:0;width:3px;height:100%;background:${catColor};border-radius:3px 0 0 3px"></div>
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px;padding-${isAr?'right':'left'}:8px">
+        <div>
+          <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px">${c.flag} ${isAr?c.nameAr:c.name}</div>
+          <div style="font-size:22px;font-weight:800;color:var(--text);line-height:1">${d.price?.toFixed(2) || '—'}</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:2px">${c.unit}</div>
+        </div>
+        <div style="text-align:${isAr?'left':'right'}">
+          <div style="background:${chgBg};color:${chgColor};font-size:11px;font-weight:700;padding:3px 8px;border-radius:99px;white-space:nowrap">${arrow} ${Math.abs(d.changePct||0).toFixed(2)}%</div>
+          <div style="font-size:11px;color:${chgColor};margin-top:4px;font-weight:600">${up?'+':''}${d.change?.toFixed(2)||'—'}</div>
+        </div>
+      </div>
+      ${egpEstimate?`<div style="font-size:11px;color:var(--text3);padding-${isAr?'right':'left'}:8px;padding-top:6px;border-top:0.5px solid var(--border)">${egpEstimate}</div>`:''}
+    </div>`;
+  }).join('');
+
+  grid.innerHTML = cards || `<div style="color:var(--text3);font-size:13px;padding:20px">${isAr?'لا توجد بيانات متاحة حالياً':'No data available — click Refresh'}</div>`;
+}
+
+function updateFXBanner(){
+  const egp = mktData['EGP=X'];
+  if(!egp) return;
+  const up = egp.change >= 0;
+  document.getElementById('fxRate').textContent = egp.price?.toFixed(2) || '—';
+  document.getElementById('fxChange').innerHTML = `<span style="color:${up?'var(--green-text)':'#a32d2d'};font-weight:700">${up?'▲':'▼'} ${Math.abs(egp.changePct||0).toFixed(2)}%</span>`;
+  // Auto-fill calculator FX rate
+  const calcFxEl = document.getElementById('calcFx');
+  if(calcFxEl && egp.price) { calcFxEl.value = egp.price.toFixed(2); calcLanded(); }
+}
+
+function renderFallbackPrices(){
+  // Show indicative/reference prices with clear disclaimer when live feed fails
+  const isAr = lang==='ar';
+  const fallback = [
+    {name:'Palm Olein (BMD)', nameAr:'أولين النخيل', price:'855–870', unit:'USD/MT', flag:'🇲🇾', note:'BMD reference'},
+    {name:'Soybean Oil (CBOT)', nameAr:'زيت الصويا', price:'42–44', unit:'USc/lb', flag:'🇺🇸', note:'CBOT reference'},
+    {name:'Sunflower Oil', nameAr:'زيت عباد الشمس', price:'870–890', unit:'USD/MT', flag:'🇺🇦', note:'EU reference'},
+    {name:'USD/EGP', nameAr:'دولار / جنيه', price:'~48.5', unit:'EGP', flag:'🇪🇬', note:'Indicative'},
+  ];
+  const grid = document.getElementById('mktGrid');
+  grid.innerHTML = `
+    <div style="grid-column:1/-1;background:#faeeda;border:1px solid #e8b96f;border-radius:8px;padding:10px 14px;font-size:12px;color:#633806;margin-bottom:4px">
+      ⚠️ ${isAr?'تعذر الاتصال بمصدر البيانات المباشر. الأسعار أدناه تقديرية للمرجعية فقط. اضغط Refresh للمحاولة مرة أخرى.':'Live feed unavailable. Prices below are indicative reference ranges only. Click Refresh to try again.'}
+    </div>
+    ${fallback.map(f=>`
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px">
+      <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;margin-bottom:6px">${f.flag} ${isAr?f.nameAr:f.name}</div>
+      <div style="font-size:20px;font-weight:800;color:var(--text)">${f.price}</div>
+      <div style="font-size:11px;color:var(--text3);margin-top:2px">${f.unit} — ${f.note}</div>
+    </div>`).join('')}`;
+}
+
+async function loadMarketNews(){
+  const isAr = lang==='ar';
+  const el = document.getElementById('mktNews');
+  if(!el) return;
+
+  // Use RSS feed via allorigins for commodity news
+  const feeds = [
+    'https://feeds.reuters.com/reuters/businessNews',
+    'https://www.investing.com/rss/news_301.rss',
+  ];
+
+  const keywords = ['palm oil','soybean','sunflower','vegetable oil','CPO','CBOT','edible oil','فول الصويا','زيت النخيل','زيت الصويا'];
+
+  try {
+    const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(feeds[0])}`);
+    const json = await res.json();
+    const xml = new DOMParser().parseFromString(json.contents, 'text/xml');
+    const items = [...xml.querySelectorAll('item')].slice(0,20);
+    const relevant = items.filter(item=>{
+      const title = item.querySelector('title')?.textContent?.toLowerCase()||'';
+      const desc  = item.querySelector('description')?.textContent?.toLowerCase()||'';
+      return keywords.some(k=>title.includes(k.toLowerCase())||desc.includes(k.toLowerCase()));
+    }).slice(0,5);
+
+    if(relevant.length===0){
+      el.innerHTML = `<div style="color:var(--text3);font-size:12px;padding:10px 0">${isAr?'لا توجد أخبار ذات صلة حالياً':'No relevant commodity news found right now'}</div>`;
+      return;
+    }
+
+    el.innerHTML = relevant.map(item=>{
+      const title = item.querySelector('title')?.textContent||'';
+      const link  = item.querySelector('link')?.textContent||'#';
+      const date  = item.querySelector('pubDate')?.textContent||'';
+      const d     = date ? new Date(date).toLocaleDateString(isAr?'ar-EG':'en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : '';
+      return `<div style="padding:10px 0;border-bottom:0.5px solid var(--border);display:flex;gap:12px;align-items:flex-start">
+        <span style="font-size:16px;flex-shrink:0">📰</span>
+        <div>
+          <a href="${link}" target="_blank" rel="noopener" style="font-size:13px;font-weight:500;color:var(--text);text-decoration:none;line-height:1.4;display:block">${title}</a>
+          <span style="font-size:11px;color:var(--text3)">${d} — Reuters</span>
+        </div>
+      </div>`;
+    }).join('');
+
+  } catch(e){
+    el.innerHTML = `<div style="color:var(--text3);font-size:12px;padding:10px 0">${isAr?'تعذر تحميل الأخبار. يرجى المحاولة لاحقاً.':'Could not load news. Please try again later.'}</div>`;
+  }
+}
+
+function calcLanded(){
+  const cif    = parseFloat(document.getElementById('calcCif')?.value)||0;
+  const duty   = parseFloat(document.getElementById('calcDuty')?.value)||0;
+  const port   = parseFloat(document.getElementById('calcPort')?.value)||0;
+  const trans  = parseFloat(document.getElementById('calcTrans')?.value)||0;
+  const fx     = parseFloat(document.getElementById('calcFx')?.value)||48.5;
+  const margin = parseFloat(document.getElementById('calcMargin')?.value)||5;
+
+  const res = document.getElementById('calcResult');
+  if(!cif||!fx){ if(res) res.style.display='none'; return; }
+
+  const cifEgp    = cif * fx;
+  const dutyAmt   = cifEgp * (duty/100);
+  const landed    = cifEgp + dutyAmt + port + trans;
+  const sellPrice = landed * (1 + margin/100);
+
+  document.getElementById('resLanded').textContent  = 'EGP ' + Math.round(landed).toLocaleString() + '/MT';
+  document.getElementById('resSell').textContent    = 'EGP ' + Math.round(sellPrice).toLocaleString() + '/MT';
+  document.getElementById('resCifEgp').textContent  = 'EGP ' + Math.round(cifEgp).toLocaleString();
+  document.getElementById('resDuty').textContent    = 'EGP ' + Math.round(dutyAmt).toLocaleString();
+  if(res) res.style.display='block';
+}
+
+
 loadSettings();
 checkSession();
 
