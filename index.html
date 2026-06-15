@@ -25,6 +25,25 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 /* ── APP SHELL ── */
 .app-shell{display:flex;height:100vh;overflow:hidden}
 
+/* ── WATERMARK ── */
+.content-area::before{
+  content:'';
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:0;
+  opacity:.028;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='180' viewBox='0 0 320 180'%3E%3Ctext x='50%25' y='45%25' font-family='Georgia,serif' font-size='22' font-weight='bold' fill='%23000' text-anchor='middle' dominant-baseline='middle'%3Eمصر الوطنية%3C/text%3E%3Ctext x='50%25' y='68%25' font-family='Arial,sans-serif' font-size='13' fill='%23000' text-anchor='middle' dominant-baseline='middle'%3EMisr Elwataneya%3C/text%3E%3C/svg%3E");
+  background-repeat:repeat;
+  background-size:320px 180px;
+  transform:rotate(-20deg) scale(1.5);
+  transform-origin:center;
+}
+.main{position:relative;z-index:1;}
+
+/* ── LOGO MARK SVG ── */
+.logo-svg{width:100%;height:100%;display:flex;align-items:center;justify-content:center}
+
 /* ── SIDEBAR ── */
 .sidebar{width:220px;min-width:220px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;transition:width .2s ease;overflow:hidden;z-index:40}
 .sidebar.collapsed{width:52px;min-width:52px}
@@ -215,7 +234,8 @@ label{font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.04em;tex
 @media(max-width:600px){.kanban{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr}.form-grid{grid-template-columns:1fr}}
 
 /* ── LOGIN SCREEN ── */
-#loginScreen{position:fixed;inset:0;background:var(--bg);z-index:999;display:flex;align-items:center;justify-content:center;padding:20px}
+#loginScreen{position:fixed;inset:0;background:var(--bg);z-index:999;display:flex;align-items:center;justify-content:center;padding:20px;overflow:hidden}
+#loginScreen::before{content:'';position:absolute;inset:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'%3E%3Cpath d='M100 20 C100 20 60 70 60 100 C60 122 78 140 100 140 C122 140 140 122 140 100 C140 70 100 20 100 20Z' fill='%23C0392B' opacity='0.04'/%3E%3C/svg%3E");background-repeat:repeat;background-size:200px 200px;pointer-events:none}
 .login-box{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:40px 36px;width:100%;max-width:400px;box-shadow:0 4px 24px rgba(0,0,0,.08)}
 .login-logo{display:flex;align-items:center;gap:12px;margin-bottom:28px}
 .login-logo-mark{width:40px;height:40px;background:var(--red);border-radius:10px;display:flex;align-items:center;justify-content:center}
@@ -251,7 +271,19 @@ label{font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.04em;tex
 <div id="loginScreen">
   <div class="login-box">
     <div class="login-logo">
-      <div class="login-logo-mark"><svg viewBox="0 0 16 16"><path d="M8 1C4.7 1 2 3.7 2 7c0 2.4 1.4 4.5 3.4 5.5L8 15l2.6-2.5C12.6 11.5 14 9.4 14 7c0-3.3-2.7-6-6-6zm0 8.5c-1.4 0-2.5-1.1-2.5-2.5S6.6 4.5 8 4.5 10.5 5.6 10.5 7 9.4 9.5 8 9.5z"/></svg></div>
+      <div class="login-logo-mark" style="background:none;width:72px;height:72px;border-radius:16px;overflow:hidden;box-shadow:0 4px 20px rgba(192,57,43,.3)">
+        <svg viewBox="0 0 72 72" width="72" height="72" xmlns="http://www.w3.org/2000/svg">
+          <rect width="72" height="72" rx="16" fill="#C0392B"/>
+          <!-- Background circles -->
+          <circle cx="36" cy="36" r="30" fill="#993C1D" opacity="0.4"/>
+          <!-- Oil drop -->
+          <path d="M36 10 C36 10 20 28 20 40 C20 49.9 27.2 58 36 58 C44.8 58 52 49.9 52 40 C52 28 36 10 36 10Z" fill="white" opacity="0.95"/>
+          <!-- Shine on drop -->
+          <ellipse cx="29" cy="36" rx="4" ry="7" fill="white" opacity="0.35"/>
+          <!-- Bottom text -->
+          <text x="36" y="68" font-family="Arial,sans-serif" font-size="7" fill="#C0392B" text-anchor="middle" font-weight="bold" opacity="0">MW</text>
+        </svg>
+      </div>
       <div>
         <div class="login-logo-name">Misr Elwataneya</div>
         <div class="login-logo-sub">Fats &amp; Oils — Trading Ops</div>
@@ -421,10 +453,21 @@ label{font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.04em;tex
 <!-- SIDEBAR -->
 <div class="sidebar" id="sidebar">
   <div class="sidebar-header">
-    <div class="logo-mark"><svg viewBox="0 0 16 16"><path d="M8 1C4.7 1 2 3.7 2 7c0 2.4 1.4 4.5 3.4 5.5L8 15l2.6-2.5C12.6 11.5 14 9.4 14 7c0-3.3-2.7-6-6-6zm0 8.5c-1.4 0-2.5-1.1-2.5-2.5S6.6 4.5 8 4.5 10.5 5.6 10.5 7 9.4 9.5 8 9.5z"/></svg></div>
+    <div class="logo-mark" style="background:none;padding:0;overflow:hidden">
+      <svg viewBox="0 0 28 28" width="28" height="28" xmlns="http://www.w3.org/2000/svg">
+        <rect width="28" height="28" rx="6" fill="#C0392B"/>
+        <!-- Oil drop shape -->
+        <path d="M14 5 C14 5 8 12 8 16.5 C8 19.5 10.7 22 14 22 C17.3 22 20 19.5 20 16.5 C20 12 14 5 14 5Z" fill="white" opacity="0.95"/>
+        <!-- Shine -->
+        <ellipse cx="11.5" cy="15" rx="1.5" ry="2.5" fill="white" opacity="0.4"/>
+      </svg>
+    </div>
     <div class="logo-text">
-      <span class="logo-name" id="logoName">Misr Elwataneya</span>
-      <span class="logo-sub" id="logoSub">Trading Ops</span>
+      <span class="logo-name" id="logoName" style="display:flex;flex-direction:column;line-height:1.1">
+        <span style="font-size:11px;color:var(--text3);font-weight:700;letter-spacing:.03em">مصر الوطنية</span>
+        <span style="font-size:13px">Misr Elwataneya</span>
+      </span>
+      <span class="logo-sub" id="logoSub">Fats &amp; Oils Ops</span>
     </div>
     <button class="sidebar-collapse" onclick="toggleSidebar()" title="Collapse sidebar">‹</button>
   </div>
