@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Misr Elwataneya — Trading Ops</title>
+<!-- Kill collapsed sidebar immediately before render -->
+<script>try{localStorage.removeItem('mew_sidebar_collapsed');}catch(e){}</script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -45,8 +47,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .logo-svg{width:100%;height:100%;display:flex;align-items:center;justify-content:center}
 
 /* ── SIDEBAR ── */
-.sidebar{width:220px;min-width:220px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;transition:width .2s ease;overflow:hidden;z-index:40}
-.sidebar.collapsed{width:52px;min-width:52px}
+.sidebar{width:220px;min-width:220px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;transition:width .25s ease;overflow:hidden;z-index:40;flex-shrink:0}
+.sidebar.collapsed{width:52px;min-width:52px;flex-shrink:0}
 .sidebar-header{padding:14px 12px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border);flex-shrink:0}
 .logo-mark{width:28px;height:28px;background:var(--red);border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .logo-mark svg{width:16px;height:16px;fill:#fff}
@@ -159,12 +161,19 @@ tbody tr:hover td{background:#fafaf8}
 .pill.call,.pill.quote{background:var(--gray-bg);color:var(--gray-text)}
 .pill.negotiating{background:var(--amber-bg);color:var(--amber-text)}
 .seg-tag{display:inline-block;padding:1px 7px;border-radius:4px;font-size:11px;font-weight:500}
-.seg-dairy{background:var(--blue-bg);color:var(--blue-text)}
+.seg-dairy,.seg-ألبان{background:var(--blue-bg);color:var(--blue-text)}
 .seg-snacks,.seg-وجبات{background:var(--amber-bg);color:var(--amber-text)}
 .seg-confectionery,.seg-conf,.seg-حلويات{background:var(--pink-bg);color:var(--pink-text)}
 .seg-bakery,.seg-مخابز{background:var(--green-bg);color:var(--green-text)}
 .seg-feed,.seg-animal,.seg-أعلاف{background:var(--gray-bg);color:var(--gray-text)}
 .seg-trading,.seg-تجارة{background:var(--purple-bg);color:var(--purple-text)}
+.seg-soaps,.seg-soap,.seg-صابون{background:#e8f4f8;color:#0c5c7c}
+.seg-sauces,.seg-sauce,.seg-صلصات{background:#fff0e6;color:#8b3a00}
+.seg-beverages,.seg-bev,.seg-مشروبات{background:#e6ffe6;color:#1a5c1a}
+.seg-frozen,.seg-أغذية{background:#e8e8ff;color:#3030a0}
+.seg-catering,.seg-تموين{background:#fff8e6;color:#7a5c00}
+.seg-pharma,.seg-pharmaceutical,.seg-دواء{background:#ffe6f0;color:#8b0044}
+.seg-other,.seg-أخرى{background:var(--gray-bg);color:var(--gray-text)}
 .key-dot{display:inline-block;width:6px;height:6px;background:var(--red);border-radius:50%;margin-right:4px;vertical-align:2px}
 [dir=rtl] .key-dot{margin-right:0;margin-left:4px}
 .hot-tag{background:var(--red-light);color:var(--red-dark);font-size:10px;padding:1px 6px;border-radius:99px;font-weight:700}
@@ -420,6 +429,10 @@ label{font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.04em;tex
           <span style="font-size:12px;color:var(--text3)">Off</span>
         </label>
       </div>
+      <div class="settings-row">
+        <span class="settings-label">Sidebar stuck? Reset it</span>
+        <button class="size-btn" onclick="resetSidebar();closeSettings()" style="color:var(--red)">Reset</button>
+      </div>
     </div>
 
     <div class="settings-group">
@@ -516,6 +529,10 @@ label{font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.04em;tex
   </div>
 
   <div class="sidebar-bottom">
+    <div style="padding:4px 14px;font-size:10px;color:var(--text3);display:flex;align-items:center;justify-content:space-between;border-bottom:0.5px solid var(--border);margin-bottom:6px">
+      <span id="versionLabel" style="font-weight:500">v30.0</span>
+      <span style="opacity:.6">مصر الوطنية</span>
+    </div>
     <div class="sidebar-user" id="sidebarUser">
       <div class="user-avatar" id="userAvatar">A</div>
       <div class="user-info">
@@ -579,7 +596,19 @@ label{font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.04em;tex
     <button class="btn primary" onclick="openClientModal()" id="btnNewClient"></button>
   </div>
   <div class="table-wrap"><table>
-    <colgroup><col style="width:80px"><col style="width:160px"><col style="width:130px"><col style="width:100px"><col style="width:100px"><col style="width:90px"><col style="width:75px"><col style="width:100px"><col style="width:130px"><col style="width:70px"><col style="width:160px"></colgroup>
+    <colgroup>
+      <col style="width:90px"><!-- Ref -->
+      <col style="width:180px"><!-- Company -->
+      <col style="width:130px"><!-- Contact -->
+      <col style="width:110px"><!-- Segment -->
+      <col style="width:110px"><!-- Phone -->
+      <col style="width:90px"><!-- Rep -->
+      <col style="width:70px"><!-- Terms -->
+      <col style="width:80px"><!-- Status -->
+      <col style="width:130px"><!-- Products -->
+      <col style="width:55px"><!-- Key -->
+      <col style="width:180px"><!-- Actions -->
+    </colgroup>
     <thead><tr id="clientThead"></tr></thead>
     <tbody id="clientsBody"></tbody>
   </table></div>
@@ -1033,7 +1062,7 @@ const T = {
     // pipeline
     searchPipeline:'🔍  Search client, product, notes…',
     allSegs:'All segments', allProds:'All products', allPrios:'All priorities',
-    segs:['Dairy','Snacks','Confectionery','Bakery','Animal Feed','Trading'],
+    segs:['Dairy','Snacks','Confectionery','Bakery','Animal Feed','Trading','Soaps & Detergents','Sauces & Condiments','Beverages','Frozen Food','Catering','Pharmaceutical','Other'],
     prios:['Hot','Normal','Cold'],
     btnTable:'☰ Table', btnKanban:'⊞ Kanban', btnNewDeal:'+ New deal',
     statActiveDeals:'Active deals', statInPipeline:'in pipeline',
@@ -1282,7 +1311,7 @@ const T = {
     btnExport:'⬇ تصدير', btnImport:'⬆ استيراد', langBtn:'🌐 English',
     searchPipeline:'🔍  ابحث باسم العميل أو المنتج…',
     allSegs:'كل القطاعات', allProds:'كل المنتجات', allPrios:'كل الأولويات',
-    segs:['ألبان','وجبات','حلويات','مخابز','أعلاف','تجارة'],
+    segs:['ألبان','وجبات','حلويات','مخابز','أعلاف','تجارة','صابون ومنظفات','صلصات وتوابل','مشروبات','أغذية مجمدة','تموين','دواء','أخرى'],
     prios:['ساخن','عادي','بارد'],
     btnTable:'☰ جدول', btnKanban:'⊞ كانبان', btnNewDeal:'+ صفقة جديدة',
     statActiveDeals:'صفقات نشطة', statInPipeline:'في خط المبيعات',
@@ -1925,8 +1954,20 @@ function toast(msg,type='success'){
 }
 
 function seg2class(s){
-  const map={Dairy:'dairy',Snacks:'snacks',Confectionery:'conf',Bakery:'bakery','Animal Feed':'feed',Trading:'trading',ألبان:'dairy',وجبات:'snacks',حلويات:'conf',مخابز:'bakery',أعلاف:'feed',تجارة:'trading'};
-  return map[s]||'feed';
+  if(!s) return 'other';
+  const map={
+    'Dairy':'dairy','Snacks':'snacks','Confectionery':'conf','Bakery':'bakery',
+    'Animal Feed':'feed','Trading':'trading',
+    'Soaps & Detergents':'soaps','Sauces & Condiments':'sauces',
+    'Beverages':'beverages','Frozen Food':'frozen','Catering':'catering',
+    'Pharmaceutical':'pharma','Other':'other',
+    'ألبان':'dairy','وجبات':'snacks','حلويات':'conf','مخابز':'bakery',
+    'أعلاف':'feed','تجارة':'trading',
+    'صابون ومنظفات':'soaps','صلصات وتوابل':'sauces',
+    'مشروبات':'beverages','أغذية مجمدة':'frozen','تموين':'catering',
+    'دواء':'pharma','أخرى':'other',
+  };
+  return map[s] || s.toLowerCase().replace(/[^a-z]/g,'').slice(0,8) || 'other';
 }
 
 // ══════════════════════════════════════
@@ -2319,9 +2360,12 @@ function renderClients(){
   cSeg.innerHTML=`<option value="">${t('allSegs')}</option>`+t('segs').map(s=>`<option>${s}</option>`).join('');
   const all=STORE.get('clients')||[];
   const q=(document.getElementById('cSrch').value||'').toLowerCase();
+  const segFilter=(document.getElementById('cSeg')?.value||'');
   const filtered=all.filter(c=>{
-    const txt=[c.company,c.contact,c.city||'',c.products||''].join(' ').toLowerCase();
-    return(!q||txt.includes(q));
+    const txt=[c.company,c.contact,c.city||'',c.products||'',c.seg||'',c.ref||'',c.phone||''].join(' ').toLowerCase();
+    const matchQ=!q||txt.includes(q);
+    const matchSeg=!segFilter||c.seg===segFilter;
+    return matchQ&&matchSeg;
   }).sort((a,b)=>a[clientSortCol]?.toString().localeCompare(b[clientSortCol]?.toString()||'')*clientSortDir);
   updateBadges();
   document.getElementById('clientThead').innerHTML=t('clientThWithRep').map(h=>`<th>${h}</th>`).join('');
@@ -5068,10 +5112,19 @@ function renderAll(){
 // ══════════════════════════════════════
 function toggleSidebar(){
   const sb=document.getElementById('sidebar');
+  const willCollapse = !sb.classList.contains('collapsed');
   sb.classList.toggle('collapsed');
   const btn=sb.querySelector('.sidebar-collapse');
-  if(btn) btn.textContent=sb.classList.contains('collapsed')?'›':'‹';
-  localStorage.setItem('mew_sidebar_collapsed',sb.classList.contains('collapsed')?'1':'0');
+  if(btn) btn.textContent = willCollapse ? '›' : '‹';
+  btn.title = willCollapse ? 'Expand sidebar' : 'Collapse sidebar';
+  localStorage.setItem('mew_sidebar_collapsed', willCollapse ? '1' : '0');
+}
+// Reset sidebar to expanded — call from console if stuck
+function resetSidebar(){
+  localStorage.removeItem('mew_sidebar_collapsed');
+  const sb=document.getElementById('sidebar');
+  if(sb){ sb.classList.remove('collapsed'); const btn=sb.querySelector('.sidebar-collapse'); if(btn) btn.textContent='‹'; }
+  toast('Sidebar reset ✓');
 }
 function openSettings(){ document.getElementById('settingsOverlay').classList.add('open'); updateSettingsLabels(); }
 function closeSettings(){ document.getElementById('settingsOverlay').classList.remove('open'); }
@@ -5132,9 +5185,13 @@ function loadSettings(){
   setFont(font);
   const fs=document.getElementById('fontSelect'); if(fs) fs.value=font;
   const side=localStorage.getItem('mew_sidebarside')||'left'; setSidebarSide(side);
-  if(localStorage.getItem('mew_sidebar_collapsed')==='1'){
-    const sb=document.getElementById('sidebar');
-    if(sb){ sb.classList.add('collapsed'); const btn=sb.querySelector('.sidebar-collapse'); if(btn) btn.textContent='›'; }
+  // SIDEBAR: always start EXPANDED — clear any stale collapsed state
+  localStorage.removeItem('mew_sidebar_collapsed');
+  const sb = document.getElementById('sidebar');
+  if(sb){
+    sb.classList.remove('collapsed');
+    const btn = sb.querySelector('.sidebar-collapse');
+    if(btn){ btn.textContent = '‹'; btn.title = 'Collapse sidebar'; }
   }
 }
 
